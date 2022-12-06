@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chenyxuan/rubikscube.git"
+    "url": "git+https://github.com/yzh20020301/CubeYZH.git"
   },
   "keywords": [
     "Rubik's Cube",
@@ -26,9 +26,9 @@
   "author": "Yuxuan Chen",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/chenyxuan/rubikscube/issues"
+    "url": "https://github.com/yzh20020301/CubeYZH/issues"
   },
-  "homepage": "https://github.com/chenyxuan/rubikscube#readme",
+  "homepage": "https://github.com/yzh20020301/CubeYZH#readme",
   "devDependencies": {
    "@babel/core": "^7.16.0",
     "@babel/plugin-proposal-class-properties": "^7.16.0",
