@@ -9,6 +9,9 @@ import Interactor from "../../cube/interactor";
 import Capturer from "../../cube/capture";
 import LBLSolver from "../../cube/lbl";
 import Cube from "../../cube/cube";
+import {Face,Face1} from "../../cube/utils_internal";
+import Solver from "../../solver/Solver";
+
 
 @Component({
     template: require("./index.html"),
@@ -56,8 +59,29 @@ export default class Playground extends Vue {
     cubejs = import(/* webpackPreload: true */ '../../preload/cubejs');
     config = cube_config;
 
+    isColorMode: boolean = false;
+    yzhcubeState: string[] = [];
+    colort: string[];
+    colors: { [key: string]: string };
+    color = "R";
+    erroryzh="";
+    iserror:boolean=false;
+    solver: Solver = new Solver();
+
     constructor() {
         super();
+        this.colors = {
+            R: "#B71C1C",
+            L: "#FF6D00",
+            U: "#F0F0F0",
+            D: "#FFD600",
+            F: "#00A020",
+            B: "#0D47A1",
+            core: "#202020",
+            gray: "#808080",
+            high: "#FF0080",
+          };
+        this.colort = ["R", "F", "D", "L", "B", "U"];
     }
 
     mounted(): void {
@@ -76,6 +100,7 @@ export default class Playground extends Vue {
     loop(): void {
         requestAnimationFrame(this.loop.bind(this));
         this.viewport.draw();
+        this.solver.init();
         this.callback();
     }
 
@@ -95,6 +120,7 @@ export default class Playground extends Vue {
 
     reset(): void {
         this.world.cube.reset();
+        this.initState=this.world.cube.serialize();
     }
 
     idle(value: number): void {
@@ -281,8 +307,10 @@ export default class Playground extends Vue {
                 this.buttonEnable = true;
             }, this.clickTimeThreshold);
 
-            if (!this.isPlayerMode) {
+            if (!this.isPlayerMode&&!this.isColorMode) {
                 this.scramble();
+            } else if (this.isColorMode){
+                this.clyzh();
             } else {
                 this.play();
             }
@@ -304,7 +332,7 @@ export default class Playground extends Vue {
             }
         }
     }
-
+    solutionyzh = "";
     redButton(): void {
         if (this.buttonEnable) {
             this.buttonEnable = false;
@@ -313,6 +341,19 @@ export default class Playground extends Vue {
             }, this.clickTimeThreshold);
 
             if (!this.isPlayerMode) {
+                if(this.isColorMode) {
+                    this.solutionyzh = this.solver.solve(this.world.cube.serialize().join(""));
+                    console.log(this.solutionyzh);
+                    if(this.solutionyzh=="great"){
+                        this.clallyzh();
+                    } else {
+                        this.erroryzh=this.solutionyzh;
+                        this.iserror=true;
+                        return;
+                    }
+                    
+                    
+                }
                 this.solve();
             } else {
                 this.quit();
@@ -342,5 +383,80 @@ export default class Playground extends Vue {
         if (this.isPlayerMode && !this.isDemoMode) {
             this.solve(false);
         }
+    }
+
+    stickers: { [face: string]: { [index: number]: string } | undefined } = {};
+    
+    get faces(): { [face: string]: number } {
+        const ret: { [face: string]: number } = {};
+        for (const face of [Face.L, Face.R, Face.D, Face.U, Face.B, Face.F]) {
+          const key = Face[face];
+          ret[key] = 0;
+        }
+        for (const c of this.initState) {
+          ret[c]++;
+        }
+        return ret;
+    }
+
+    stick(index: number, face: number): void {
+        if (index < 0) {
+          return;
+        }
+
+        this.initState=this.world.cube.serialize();
+
+        //const cubelet = this.world.cube.cubelets[index];
+        //face = cubelet.convertFace(face);
+        let arr = this.stickers[Face[face]];
+        if (arr == undefined) {
+          arr = {};
+          this.stickers[Face[face]] = arr;
+        }
+        arr[index] = this.color;
+        let zyzh=Math.floor(index/9);
+        let yyzh=Math.floor((index%9)/3);
+        let xyzh=Math.floor((index%9)%3);
+        let temp=0
+        switch(face){
+            case Face.U:temp=3*zyzh+xyzh;break;
+            case Face.R:temp=9+3*(2-yyzh)+2-zyzh;break;
+            case Face.F:temp=9*2+3*(2-yyzh)+xyzh;break;
+            case Face.D:temp=9*3+3*(2-zyzh)+xyzh;break;
+            case Face.L:temp=9*4+3*(2-yyzh)+zyzh;break;
+            case Face.B:temp=9*5+3*(2-yyzh)+2-xyzh;break;
+        }
+        this.initState[temp]=this.color;
+        
+        //this.world.cube.stick(index, face, this.color);
+        //this.initState=this.world.cube.serialize();
+        this.world.cube.restore(this.initState);
+        //console.log(face,index,this.initState,this.color,xyzh,yyzh,zyzh,temp);
+    }
+
+
+    setcubeyzh():void{
+        this.isColorMode=true;
+        this.isPlayerMode=false;
+        const yzhstate="????U????????R????????F????????D????????L????????B????";
+        this.initState=yzhstate.split("");
+        //console.log(this.initState);
+        this.world.cube.restore(this.initState);
+        this.viewport.resize(this.width, this.height - this.size * 5);
+        this.world.controller.taps.push((index: number, face: number) => {
+            this.stick(index, face);
+        });
+    }
+
+    clyzh():void{
+        const yzhstate="????U????????R????????F????????D????????L????????B????";
+        this.initState=yzhstate.split("");
+        this.world.cube.restore(this.initState);
+    }
+
+    clallyzh():void{
+        this.viewport.resize(this.width, this.height - this.size * 3.5);
+        this.world.controller.taps=[];
+        this.isColorMode=false;
     }
 }

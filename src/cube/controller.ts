@@ -6,7 +6,7 @@ import World from "./world";
 import { twister } from "./twister";
 import { axis_planes, axis_vectors, cube_config, cube_size, indexToLayer, worldToIndex } from "./utils";
 import { Box3, Vector2, Vector3 } from "three";
-
+import { Face, Frame, Sticker } from "./utils_internal";
 
 export class Holder {
   vector: THREE.Vector3;
@@ -38,11 +38,13 @@ export default class Controller {
 
   holder: Holder;
   group: CubeGroup | null;
+  taps: ((index: number, face: Face | null) => void)[];
 
 
   constructor(world: World) {
     this._lock = false;
     this._disable = false;
+    this.taps = [];
 
     this.world = world;
     this.dragging = false;
@@ -265,6 +267,24 @@ export default class Controller {
   }
 
   handleUp(): void {
+    if (this.dragging) {
+      let face = null;
+      switch (this.holder.axis) {
+        case 'x':
+          face = Face.R;
+          break;
+        case 'y':
+          face = Face.U;
+          break;
+        case 'z':
+          face = Face.F;
+          break;
+      }
+      for (const tap of this.taps) {
+        tap(this.holder.index, face);
+        break;
+      }
+    }
     if (this.rotating) {
       let angle = this.angle;
       if (!this.lock) {

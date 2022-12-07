@@ -1,4 +1,4 @@
-import { cubelet_defs, cubelet_core, cubelet_frame, cubelet_sticker, cubelet_face_attrs, directionToIndex, facePostionBindings, cubelet_lambers } from "./utils";
+import { cubelet_colors, cubelet_defs, cubelet_core, cubelet_frame, cubelet_sticker, cubelet_face_attrs, directionToIndex, facePostionBindings, cubelet_lambers } from "./utils";
 import * as THREE from "three";
 import { indexToDirection } from "./utils"
 import { Face } from "./utils_internal";
@@ -26,7 +26,7 @@ export default class Cubelet extends THREE.Group {
     super();
     this._vector = new THREE.Vector3();
     this.index = index;
-
+    
     const drctn = indexToDirection(index);
     this.vector = new THREE.Vector3(drctn.x, drctn.y, drctn.z);
 

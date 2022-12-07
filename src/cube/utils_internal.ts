@@ -9,6 +9,9 @@ export enum Face {
     F,
 }
 
+export const Face1=[4,1,3,0,5,2]
+
+
 export class Frame extends THREE.BufferGeometry {
     private static readonly _indices = [
         0, 2, 1,
