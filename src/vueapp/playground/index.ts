@@ -110,6 +110,7 @@ export default class Playground extends Vue {
         this.size = Math.ceil(Math.min(this.width / 6, this.height / 12));
         this.demoGridWidth = ~~(Math.min(this.size * 2, this.width / 4) * 100) / 100;
         this.viewport.resize(this.width, this.height - this.size * 3.5);
+        if(this.isColorMode) this.viewport.resize(this.width, this.height - this.size * 5);
         this.world.cube.dirty = true;
     }
 
