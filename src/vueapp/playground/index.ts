@@ -493,6 +493,11 @@ export default class Playground extends Vue {
             case Face.L:temp=9*4+3*(2-yyzh)+zyzh;break;
             case Face.B:temp=9*5+3*(2-yyzh)+2-xyzh;break;
         }
+        if(temp==4 || temp==13||temp==22||temp==31||temp==40||temp==49){
+            this.iserror=true;
+            this.erroryzh="Don't touch me!!!";
+            return;
+        }
         this.initState[temp]=this.color;
         
         //this.world.cube.stick(index, face, this.color);
