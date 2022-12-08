@@ -248,7 +248,9 @@ export const lblOrderMapping: { [key: string]: string } = {
   "B": "B",
   "b": "B'",
   "Y": "y",
-  "y": "y'"
+  "y": "y'",
+    //新增
+  "~": "~"
 }
 
 export const faceToColor: { [key: string]: string } = {
@@ -285,7 +287,9 @@ export const oppositeMapping: { [key: string]: string } = {
   "F": "B",
   "B": "F",
   "y": "y'",
-  "y'": "y"
+  "y'": "y",
+  //新增
+  "~": "~"
 }
 
 export const delayedYellowToTop = (last: string): { [key: string]: string } => {

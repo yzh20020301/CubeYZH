@@ -31,6 +31,10 @@ export default class Playground extends Vue {
     width: number = 0;
     height: number = 0;
     size: number = 0;
+    //需要在这在引入两个变量用来记录switch和back后的状态
+    
+    //cubestep新属性
+    cubestep: string[]=[];
 
     solution: string[] = [];
     progress: number = 0;
@@ -59,7 +63,11 @@ export default class Playground extends Vue {
     cubejs = import(/* webpackPreload: true */ '../../preload/cubejs');
     config = cube_config;
 
-    isColorMode: boolean = false;
+    isSwitch:boolean=false;//新添加的属性
+    isTeaching:boolean=false;//新增属性
+    isColorMode: boolean = false;//新增属性
+
+
     yzhcubeState: string[] = [];
     colort: string[];
     colors: { [key: string]: string };
@@ -164,6 +172,9 @@ export default class Playground extends Vue {
 
             solution.push(combined);
             const lblSolution = this.lblSolver.solve(lblState, delayed);
+            
+            //检查lbl的输出
+            console.log(lblSolution);
 
             for (let i = 0; i < lblSolution.length; i++) {
                 const lblOrders = lblSolution[i].split("").filter(Boolean);
@@ -171,7 +182,11 @@ export default class Playground extends Vue {
                     let step = lblOrderMapping[order];
                     if (!step) continue;
                     if (i <= 1) {
-                        const params = stringToTwistParams[step];
+                        //修改
+                        if (step !='~'){
+                            const params = stringToTwistParams[step];
+                        }
+                        //const params = stringToTwistParams[step];
                         if (params.axis != delayed[0]) {
                             if (step[0] == 'y') {
                                 step = oppositeMapping[step];
@@ -203,6 +218,18 @@ export default class Playground extends Vue {
             } else {
                 this.showTicks = false;
             }
+            //新增标签
+            this.cubestep=[];
+            for(const j of this.solution){
+
+                if (j=="~") {     
+                    this.showTicks = true;
+                    this.cubestep.push('!');
+                } else {
+                    this.showTicks = false;
+                    this.cubestep.push('');
+                }
+            }
         }
         else if (solverId === 1) {
             const promise = await this.cubejs;
@@ -227,6 +254,8 @@ export default class Playground extends Vue {
         this.setProgress(0);
         this.idle(0.5);
         this.isPlaying = isEntry;
+
+        this.isTeaching=false;//新增内容
     }
 
     @Watch("isPlayerMode")
@@ -275,6 +304,22 @@ export default class Playground extends Vue {
             this.isDemoMode = false;
         }
         this.world.cube.restore(this.backupState);
+    }
+
+    //以下两个函数为新增函数
+    switch():void{
+        this.pause();
+        this.isSwitch= true;
+        this.isPlayerMode = false;
+        //this.world.cube.restore(this.***);//restore back的状态。
+    }
+    back():void{
+        this.isSwitch=false;
+        this.isPlayerMode = true;   
+        //this.world.cube.restore(this.***);//restore pause时的状态。
+        //this.solve;     
+        
+        //如何获取我自己拧动后的一个新的状态  
     }
 
     setProgress(value: number) {
@@ -362,6 +407,24 @@ export default class Playground extends Vue {
         }
     }
 
+//新增
+    blackButton(): void {
+        if (this.buttonEnable) {
+            this.buttonEnable = false;
+            setTimeout(() => {
+                this.buttonEnable = true;
+            }, this.clickTimeThreshold);
+
+
+            if (!this.isSwitch) {
+                this.switch();
+
+            } else {
+                this.back();
+            }
+        }
+    }
+
     selectDemo(idx: number): void {
         this.listd = false;
         if (!this.isPlayerMode) {
@@ -369,6 +432,9 @@ export default class Playground extends Vue {
         }
         this.isDemoMode = true;
         this.isPlayerMode = true;
+
+        this.isTeaching=true;//新增属性
+
         this.demoName = this.demoData[idx].name;
         this.initState = this.demoData[idx].state.split("");
         this.solution = this.demoData[idx].solution.split(' ').filter(Boolean);

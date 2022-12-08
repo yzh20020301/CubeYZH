@@ -587,11 +587,17 @@ export default class LBLSolver {
     solveCube(delayed: string): string[] {
         let steps = [];
         steps.push(this.FIRST_LAYER_EDGES(delayed));
+        steps.push("~");//添加~
         steps.push(this.FIRST_LAYER_CORNERS(delayed));
+        steps.push("~");//添加~
         steps.push(this.SECOND_LAYER());
+        steps.push("~");//添加~
         steps.push(this.TOP_CROSS());
+        steps.push("~");//添加~
         steps.push(this.THIRD_LAYER_CORNERS_POS());
+        steps.push("~");//添加~
         steps.push(this.THIRD_LAYER_CORNERS_ORI());
+        steps.push("~");//添加~
         steps.push(this.THIRD_LAYER_EDGES());
         return steps;
     };

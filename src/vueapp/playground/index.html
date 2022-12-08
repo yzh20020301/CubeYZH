@@ -2,22 +2,22 @@
     <div v-resize="resize" style="user-select: none; touch-action: none;">
         <v-dialog v-model="iserror" :width="Math.min(size * 8, width)" eager>
             <v-card>
-              <v-card-title style="text-transform: none;">
-                <div :style="{'font-size':size * 0.4+'px','padding-top':size/8+'px'}">
-                  ERROR!
-                </div>
-              </v-card-title>
-              <v-card-actions>
-                <v-layout row wrap style="margin: 0%;">
-                  <v-flex xs12 d-flex>
-                    <v-textarea id="copy" :style="{'font-size':size / 3 + 'px', 'line-height':size / 2 + 'px'}" solo flat
-                      outlined hide-details v-model="erroryzh">
-                    </v-textarea>
-                  </v-flex>
-                </v-layout>
-              </v-card-actions>
+                <v-card-title style="text-transform: none;">
+                    <div :style="{'font-size':size * 0.4+'px','padding-top':size/8+'px'}">
+                        ERROR!
+                    </div>
+                </v-card-title>
+                <v-card-actions>
+                    <v-layout row wrap style="margin: 0%;">
+                        <v-flex xs12 d-flex>
+                            <v-textarea id="copy" :style="{'font-size':size / 3 + 'px', 'line-height':size / 2 + 'px'}"
+                                solo flat outlined hide-details v-model="erroryzh">
+                            </v-textarea>
+                        </v-flex>
+                    </v-layout>
+                </v-card-actions>
             </v-card>
-          </v-dialog>
+        </v-dialog>
         <v-flex xs12 :style="{
                 'height':size + 'px'
             }" id="top-flex"></v-flex>
@@ -35,9 +35,9 @@
             width: size * 0.9 + 'px', 
             height: size * 0.9 + 'px', 
             'margin-right': width / 2 - Math.min(size * 4, width / 2) + size * 2.2 + 'px'}" @click='setcubeyzh'>
-                <v-icon :size="size * 0.6">
-                    colorize
-                </v-icon>
+            <v-icon :size="size * 0.6">
+                colorize
+            </v-icon>
         </v-btn>
 
         <v-btn fixed left top text color="primary" style="user-select: none; margin: 0%; padding: 0%;"
@@ -83,56 +83,116 @@
             <v-container fluid grid-list-md text-xs-center
                 :style="{width: Math.min(size * 8, width) + 'px', height: size * 4 + 'px'}">
                 <v-layout row wrap>
-                    <v-flex xs12 :style="{
-                    'height': size + 'px'
-                }" v-if="isPlayerMode">
+                    <v-flex xs12 :style="{'height': size + 'px'}" v-if="isPlayerMode">
                         <v-slider :value="progress" style="margin: 0%; padding: 0%;" :max="solution.length"
-                            :tick-size="3" thumb-label="always" :ticks="showTicks" hide-details
+                            :tick-size="3" :tick-labels="cubestep" thumb-label="always" :ticks="showTicks" hide-details
                             v-on:input="setProgress">
                             <template v-slot:thumb-label>
                                 {{ progress == 0 ? '#' : solution[progress - 1] }}
                             </template>
                         </v-slider>
                     </v-flex>
-                    <v-flex v-for="item in colort" :key="item" xs4 :style="{padding:size * 0.06 + 'px'}" v-if="isColorMode&&!isPlayerMode">
+                    <v-flex v-for="item in colort" :key="item" xs4 :style="{padding:size * 0.06 + 'px'}"v-if="isColorMode&&!isPlayerMode">
                         <v-btn @click="color = item;" :color="colors[item]" block depressed :ripple="false"
-                          style="min-width: 0%; min-height: 0%; margin: 0%; padding: 0%;" :height="size">
-                          <span v-show="color!=item" :style="{'font-size':size * 0.5 + 'px'}">{{faces[item]}}</span>
-                          <v-icon :size="size * 0.8" v-show="color==item">colorize</v-icon>
+                            style="min-width: 0%; min-height: 0%; margin: 0%; padding: 0%;" :height="size">
+                            <span v-show="color!=item" :style="{'font-size':size * 0.5 + 'px'}">{{faces[item]}}</span>
+                            <v-icon :size="size * 0.8" v-show="color==item">colorize</v-icon>
                         </v-btn>
-                      </v-flex>
-                    <v-flex xs3 :style="{padding: size * 0.06 + 'px'}">
+                    </v-flex>
+                    <v-flex xs4 :style="{padding: size * 0.06 + 'px'}" v-if="!isPlayerMode&&!isSwitch"">
                         <v-btn @click="greenButton" block text color="green"
                             style="min-width: 0%; min-height: 0%; margin: 0%; padding: 0%;" :height="size">
-                            <div :style="{'font-size': size * 0.25 +'px'}">
-                                {{ !isPlayerMode ? (isColorMode?'Clean':'Scramble') : (progress == solution.length ? 'Replay' : 'Play') }}
+                            <div :style="{'font-size': size * 0.3 +'px'}">
+                                {{isColorMode?'Clean':'Scramble'}}
                             </div>
                         </v-btn>
                     </v-flex>
-                    <v-flex xs3 :style="{padding: size * 0.06 + 'px'}">
+
+                    <v-flex xs3 :style="{padding: size * 0.06 + 'px'}" v-if="isPlayerMode&&!isSwitch&&!isTeaching"">
+                        <v-btn @click="greenButton" block text color="green"
+                            style="min-width: 0%; min-height: 0%; margin: 0%; padding: 0%;" :height="size">
+                            <div :style="{'font-size': size * 0.3 +'px'}">
+                                {{  progress == solution.length ? 'Replay' : 'Play'}}
+                            </div>
+                        </v-btn>
+                    </v-flex>
+                    <v-flex xs4 :style="{padding: size * 0.06 + 'px'}" v-if="isPlayerMode&&!isSwitch&&isTeaching"">
+                        <v-btn @click="greenButton" block text color="green"
+                            style="min-width: 0%; min-height: 0%; margin: 0%; padding: 0%;" :height="size">
+                            <div :style="{'font-size': size * 0.3 +'px'}">
+                                {{  progress == solution.length ? 'Replay' : 'Play'}}
+                            </div>
+                        </v-btn>
+                    </v-flex>
+
+
+                    <v-flex xs4 :style="{padding: size * 0.06 + 'px'}" v-if="!isPlayerMode&&!isSwitch"">
                         <v-btn @click="blueButton" block text color="blue"
                             style="min-width: 0%; min-height: 0%; margin: 0%; padding: 0%;" :height="size">
-                            <div :style="{'font-size': size * 0.25 +'px'}">
-                                {{ !isPlayerMode ? 'Reset' : 'Pause' }}
+                            <div :style="{'font-size': size * 0.3 +'px'}">
+                                {{ 'Reset' }}
                             </div>
                         </v-btn>
                     </v-flex>
-                    <v-flex xs3 :style="{padding: size * 0.06 + 'px'}">
+
+                    <v-flex xs3 :style="{padding: size * 0.06 + 'px'}" v-if="isPlayerMode&&!isSwitch&&!isTeaching"">
+                        <v-btn @click="blueButton" block text color="blue"
+                            style="min-width: 0%; min-height: 0%; margin: 0%; padding: 0%;" :height="size">
+                            <div :style="{'font-size': size * 0.3 +'px'}">
+                                {{  'Pause' }}
+                            </div>
+                        </v-btn>
+                    </v-flex>
+                    <v-flex xs4 :style="{padding: size * 0.06 + 'px'}" v-if="isPlayerMode&&!isSwitch&&isTeaching"">
+                        <v-btn @click="blueButton" block text color="blue"
+                            style="min-width: 0%; min-height: 0%; margin: 0%; padding: 0%;" :height="size">
+                            <div :style="{'font-size': size * 0.3 +'px'}">
+                                {{  'Pause' }}
+                            </div>
+                        </v-btn>
+                    </v-flex>
+
+                    <v-flex xs4 :style="{padding: size * 0.06 + 'px'}" v-if="!isPlayerMode&&!isSwitch"">
                         <v-btn @click="redButton" block text color="red"
                             style="min-width: 0%; min-height: 0%; margin: 0%; padding: 0%;" :height="size">
-                            <div :style="{'font-size': size * 0.25 +'px'}">
-                                {{ !isPlayerMode ? 'Solve' : 'Quit' }}
+                            <div :style="{'font-size': size * 0.3 +'px'}">
+                                {{ 'Solve' }}
                             </div>
                         </v-btn>
                     </v-flex>
-                    <v-flex xs3 :style="{padding: size * 0.06 + 'px'}">
-                        <v-btn @click="greenButton" block text color="purple"
+
+                    <v-flex xs3 :style="{padding: size * 0.06 + 'px'}" v-if="isPlayerMode&&!isSwitch&&!isTeaching"">
+                        <v-btn @click="blackButton" block text color="blaCK" style="min-width: 0%; min-height: 0%; margin: 0%; padding: 0%;" :height="size">
+                          <div :style="{'font-size': size * 0.3 +'px'}">
+                            {{'Switch'}}
+                          </div>
+                        </v-btn>
+                      </v-flex>
+
+                    <v-flex xs3 :style="{padding: size * 0.06 + 'px'}" v-if="isPlayerMode&&!isSwitch&&!isTeaching"">
+                        <v-btn @click="redButton" block text color="red"
                             style="min-width: 0%; min-height: 0%; margin: 0%; padding: 0%;" :height="size">
-                            <div :style="{'font-size': size * 0.25 +'px'}">
-                                SPLITNOT
+                            <div :style="{'font-size': size * 0.3 +'px'}">
+                                {{  'Quit' }}
                             </div>
                         </v-btn>
                     </v-flex>
+                    <v-flex xs4 :style="{padding: size * 0.06 + 'px'}" v-if="isPlayerMode&&!isSwitch&&isTeaching"">
+                        <v-btn @click="redButton" block text color="red"
+                            style="min-width: 0%; min-height: 0%; margin: 0%; padding: 0%;" :height="size">
+                            <div :style="{'font-size': size * 0.3 +'px'}">
+                                {{  'Quit' }}
+                            </div>
+                        </v-btn>
+                    </v-flex>
+                    
+                    <v-flex xs12 :style="{padding: size * 0.06 + 'px'}" v-if="!isPlayerMode&&isSwitch&&!isTeaching"">
+                        <v-btn @click="blackButton" block text color="blaCK" style="min-width: 0%; min-height: 0%; margin: 0%; padding: 0%;" :height="size">
+                          <div :style="{'font-size': size * 0.3 +'px'}">
+                            {{'back'}}
+                          </div>
+                        </v-btn>
+                      </v-flex>
                 </v-layout>
             </v-container>
         </v-card>
