@@ -31,7 +31,6 @@ export default class Playground extends Vue {
     width: number = 0;
     height: number = 0;
     size: number = 0;
-    //需要在这在引入两个变量用来记录switch和back后的状态
     
     //cubestep新属性
     cubestep: string[]=[];
@@ -59,6 +58,8 @@ export default class Playground extends Vue {
     lblSolver = new LBLSolver();
     showTicks: Boolean | string = false;
     backupState: string[] = [];
+    backupState_player: string[] = [];
+    backupState_switch: string[] = [];
 
     cubejs = import(/* webpackPreload: true */ '../../preload/cubejs');
     config = cube_config;
@@ -69,12 +70,16 @@ export default class Playground extends Vue {
 
 
     yzhcubeState: string[] = [];
+    yzhcubeStatec: string[] = [];
     colort: string[];
     colors: { [key: string]: string };
     color = "R";
     erroryzh="";
     iserror:boolean=false;
     solver: Solver = new Solver();
+
+    //新增
+    color_plane: string[] = [];
 
     constructor() {
         super();
@@ -85,11 +90,15 @@ export default class Playground extends Vue {
             D: "#FFD600",
             F: "#00A020",
             B: "#0D47A1",
+            LZJ: "#FFFFFF",
             core: "#202020",
             gray: "#808080",
             high: "#FF0080",
           };
         this.colort = ["R", "F", "D", "L", "B", "U"];
+        this.yzhcubeState=this.world.cube.serialize();
+        const yzhstate="????U????????R????????F????????D????????L????????B????";
+        this.yzhcubeStatec=yzhstate.split("");
     }
 
     mounted(): void {
@@ -142,6 +151,8 @@ export default class Playground extends Vue {
         if (isEntry) {
             if (!this.isPlayerMode) {
                 this.backupState = this.world.cube.serialize();
+                this.backupState_player = this.world.cube.serialize();
+                this.backupState_switch = this.world.cube.serialize();
             }
             this.initState = this.world.cube.serialize();
         }
@@ -183,10 +194,10 @@ export default class Playground extends Vue {
                     if (!step) continue;
                     if (i <= 1) {
                         //修改
-                        if (step !='~'){
-                            const params = stringToTwistParams[step];
+                        if (step == "~"){
+                            continue;
                         }
-                        //const params = stringToTwistParams[step];
+                        const params = stringToTwistParams[step];
                         if (params.axis != delayed[0]) {
                             if (step[0] == 'y') {
                                 step = oppositeMapping[step];
@@ -300,26 +311,31 @@ export default class Playground extends Vue {
     quit(): void {
         this.isPlaying = false;
         this.isPlayerMode = false;
+        //this.isColorMode=false;
         if (this.isDemoMode) {
             this.isDemoMode = false;
         }
         this.world.cube.restore(this.backupState);
+        //console.log(this.backupState);
     }
 
     //以下两个函数为新增函数
     switch():void{
         this.pause();
+
         this.isSwitch= true;
         this.isPlayerMode = false;
-        //this.world.cube.restore(this.***);//restore back的状态。
+
+        this.backupState_player = this.world.cube.serialize();
+        this.world.cube.restore(this.backupState_switch);
     }
     back():void{
         this.isSwitch=false;
-        this.isPlayerMode = true;   
-        //this.world.cube.restore(this.***);//restore pause时的状态。
-        //this.solve;     
-        
-        //如何获取我自己拧动后的一个新的状态  
+        this.isPlayerMode = true;
+
+        this.backupState_switch = this.world.cube.serialize();
+        this.world.cube.restore(this.backupState_player);
+
     }
 
     setProgress(value: number) {
@@ -345,6 +361,24 @@ export default class Playground extends Vue {
 
         this.progress = value;
     }
+    cancle():void{//针对编辑模块而言
+        this.isColorMode=false;
+        this.viewport.resize(this.width, this.height - this.size * 3.5);
+        this.yzhcubeStatec=this.initState;
+        this.initState=this.yzhcubeState;
+        this.world.cube.restore(this.initState);
+    }
+    purpleButton(): void {
+        if (this.buttonEnable) {
+            this.buttonEnable = false;
+            setTimeout(() => {
+                this.buttonEnable = true;
+            }, this.clickTimeThreshold);
+            this.cancle();
+        }
+    }
+    
+
 
     greenButton(): void {
         if (this.buttonEnable) {
@@ -493,11 +527,6 @@ export default class Playground extends Vue {
             case Face.L:temp=9*4+3*(2-yyzh)+zyzh;break;
             case Face.B:temp=9*5+3*(2-yyzh)+2-xyzh;break;
         }
-        if(temp==4 || temp==13||temp==22||temp==31||temp==40||temp==49){
-            this.iserror=true;
-            this.erroryzh="Don't touch me!!!";
-            return;
-        }
         this.initState[temp]=this.color;
         
         //this.world.cube.stick(index, face, this.color);
@@ -510,8 +539,8 @@ export default class Playground extends Vue {
     setcubeyzh():void{
         this.isColorMode=true;
         this.isPlayerMode=false;
-        const yzhstate="????U????????R????????F????????D????????L????????B????";
-        this.initState=yzhstate.split("");
+        this.yzhcubeState=this.world.cube.serialize();
+        this.initState=this.yzhcubeStatec;
         //console.log(this.initState);
         this.world.cube.restore(this.initState);
         this.viewport.resize(this.width, this.height - this.size * 5);
@@ -531,4 +560,92 @@ export default class Playground extends Vue {
         this.world.controller.taps=[];
         this.isColorMode=false;
     }
+
+///*
+    //实现方式一：文字
+    isProjection: boolean = false;
+
+    project_word(): void {
+        this.isProjection = true;
+
+        let state: string[] = this.world.cube.serialize();
+        let curState: string[] = state;
+        let index: number = 0;
+/*
+        for (let i = 0; i < 6*9; i++) {
+            if (state[i] == 'u' || state[i] == 'U') { //Face "Up"
+                curState[i] = 'U'; //Color "White"
+            } else if (state[i] == 'r' || state[i] == 'R') { //Face "Right"
+                curState[i] = 'R'; //Color "Red"
+            } else if (state[i] == 'f' || state[i] == 'F') { //Face "Front"
+                curState[i] = 'F'; //Color "Green"
+            } else if (state[i] == 'l' || state[i] == 'L') { //Face "Left"
+                curState[i] = 'L'; //Color "Orange"
+            } else if (state[i] == 'b' || state[i] == 'B') { //Face "Behind"
+                curState[i] = 'B'; //Color "Blue"
+            } else if (state[i] == 'd' || state[i] == 'D') { //Face "Down"
+                curState[i] = 'D'; //Color "Yellow"
+            }
+        }
+*/
+        console.log(curState);
+        console.log(this.color_plane);
+        //console.log(this.colort);
+
+        //initialize with space --- 9 * 12
+        for (let row = 0; row < 9; row++) {
+            for (let col = 0; col < 12; col++) {
+                this.color_plane[row*12 + col] = 'LZJ';
+            }
+        }
+        console.log(this.color_plane);
+        //this.color_plane=[];//
+
+
+        //Face "up"
+        for (let row = 0; row < 3; row++) {
+            for (let col = 3; col < 6; col++) {
+                this.color_plane[row*12 + col] = curState[index++];
+            }
+        }
+
+        //Face "right"
+        for (let row = 3; row < 6; row++) {
+            for (let col = 6; col < 9; col++) {
+                this.color_plane[row*12 + col] = curState[index++];
+            }
+        }
+
+        //Face "front"
+        for (let row = 3; row < 6; row++) {
+            for (let col = 3; col < 6; col++) {
+                this.color_plane[row*12 + col] = curState[index++];
+            }
+        }
+
+        //Face "down"
+        for (let row = 6; row < 9; row++) {
+            for (let col = 3; col < 6; col++) {
+                this.color_plane[row*12 + col] = curState[index++];
+            }
+        }
+
+        //Face "left"
+        for (let row = 3; row < 6; row++) {
+            for (let col = 0; col < 3; col++) {
+                this.color_plane[row*12 + col] = curState[index++];
+            }
+        }
+
+        //Face "behind"
+        for (let row = 3; row < 6; row++) {
+            for (let col = 9; col < 12; col++) {
+                this.color_plane[row*12 + col] = curState[index++];
+            }
+        }
+
+        //return this.color;
+        console.log(this.color_plane);
+    }
+//*/
 }

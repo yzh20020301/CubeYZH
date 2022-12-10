@@ -503,7 +503,8 @@ export default class CubieCube {
     const f = [];
     const centers = facelet[4] + facelet[13] + facelet[22] + facelet[31] + facelet[40] + facelet[49];
     for (let i = 0; i < 54; ++i) {
-      f[i] = centers.indexOf(facelet[i]);
+      f[i] = centers.toString().indexOf(facelet[i]);
+      //这里多增加了一个toString否则，jest的时候会报错indexOf is not a function
       if (f[i] == -1) {
         return false;
       }

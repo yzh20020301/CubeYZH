@@ -142,7 +142,6 @@ export default class Solver {
         return 0;
       }
     }
-
     if (maxl == 0 || this.preMoveLen + Solver.MIN_P1LENGTH_PRE >= this.length1) {
       return 1;
     }
