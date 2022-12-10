@@ -537,6 +537,7 @@ export default class Playground extends Vue {
 
 
     setcubeyzh():void{
+        if(this.isColorMode==true) return;
         this.isColorMode=true;
         this.isPlayerMode=false;
         this.yzhcubeState=this.world.cube.serialize();
